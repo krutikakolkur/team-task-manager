@@ -114,14 +114,4 @@ The schema is plain SQL in `backend/db.js`. To move to Postgres/MySQL for a more
 2. Port the `CREATE TABLE` statements in `db.js` (they're already standard SQL with minor SQLite-specific syntax like `AUTOINCREMENT`/`datetime('now')` to adjust).
 3. Swap `db.prepare(...).get()/.all()/.run()` calls in the route files for your driver's query methods.
 
----
 
-## 🎬 Demo script (for your 2–5 min video)
-
-1. Sign up as "Alice" → create a project → note you're the Admin.
-2. Sign up as "Bob" in a second browser/incognito window.
-3. As Alice, invite Bob to the project as a Member.
-4. As Alice, create a task and assign it to Bob, with a due date.
-5. As Bob, open the project, change the task status to "In Progress" then "Done".
-6. As Bob, try to delete a task or add a member → show the 403 / role restriction.
-7. Show the dashboard counts updating live.
