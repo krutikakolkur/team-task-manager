@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relay — Team Task Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12141B;
+  --surface:#1B1E28;
+  --surface-2:#232733;
+  --border:#2E3340;
+  --text:#EDEEF2;
+  --text-dim:#9297A6;
+  --text-faint:#5D6272;
+  --accent:#E8A33D;
+  --accent-soft:rgba(232,163,61,0.14);
+  --done:#4FD1C5;
+  --done-soft:rgba(79,209,197,0.14);
+  --progress:#7C9FFF;
+  --progress-soft:rgba(124,159,255,0.14);
+  --overdue:#F2545B;
+  --overdue-soft:rgba(242,84,91,0.14);
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.brand,button{font-family:'Space Grotesk',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+a{color:inherit;}
+.hidden{display:none !important;}
+
+/* ---------- Auth screen ---------- */
+#auth-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(232,163,61,0.10), transparent),
+    radial-gradient(ellipse 700px 500px at 100% 110%, rgba(124,159,255,0.10), transparent),
+    var(--bg);
+}
+.auth-card{
+  width:100%;
+  max-width:400px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:36px 32px;
+}
+.brand-mark{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:28px;
+}
+.brand-mark .dot{
+  width:11px;height:11px;border-radius:3px;
+  background:var(--accent);
+  transform:rotate(45deg);
+}
+.brand-mark span{font-weight:700;font-size:20px;letter-spacing:-0.02em;}
+.auth-card h1{font-size:22px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em;}
+.auth-card p.sub{color:var(--text-dim);font-size:14px;margin-bottom:26px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;}
+.field input{
+  width:100%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:11px 13px;
+  color:var(--text);
+  font-size:14px;
+  font-family:'Inter',sans-serif;
+  outline:none;
+  transition:border-color .15s;
+}
+.field input:focus{border-color:var(--accent);}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:8px;
+  padding:11px 18px;
+  font-size:14px;font-weight:600;
+  cursor:pointer;
+  transition:all .15s;
+  font-family:'Space Grotesk',sans-serif;
+}
+.btn-primary{background:var(--accent);color:#1A1204;width:100%;margin-top:6px;}
+.btn-primary:hover{background:#F0AE52;}
+.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--text-faint);color:var(--text);}
+.btn-small{padding:7px 12px;font-size:12.5px;}
+.auth-switch{margin-top:20px;text-align:center;font-size:13.5px;color:var(--text-dim);}
+.auth-switch button{background:none;border:none;color:var(--accent);cursor:pointer;font-family:'Inter';font-size:13.5px;font-weight:600;}
+.error-msg{
+  background:var(--overdue-soft);
+  border:1px solid rgba(242,84,91,0.35);
+  color:#FF9096;
+  font-size:13px;
+  padding:10px 12px;
+  border-radius:8px;
+  margin-bottom:16px;
+}
+
+/* ---------- App shell ---------- */
+#app-screen{display:flex;min-height:100vh;}
+.sidebar{
+  width:260px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:22px 18px;
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+}
+.sidebar .brand-mark{margin-bottom:32px;padding-left:4px;}
+.sidebar-section-label{
+  font-size:11px;text-transform:uppercase;letter-spacing:0.07em;
+  color:var(--text-faint);font-weight:700;margin:18px 0 10px 4px;
+}
+.project-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;border-radius:8px;cursor:pointer;
+  font-size:13.5px;color:var(--text-dim);margin-bottom:2px;
+  transition:background .12s;
+}
+.project-item:hover{background:var(--surface-2);color:var(--text);}
+.project-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+.project-item .role-pill{
+  font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 6px;border-radius:4px;background:var(--surface-2);color:var(--text-faint);font-weight:700;
+}
+.sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
+.user-chip{display:flex;align-items:center;gap:10px;padding:6px 4px;}
+.avatar{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),#F0AE52);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:#1A1204;font-size:13px;flex-shrink:0;
+}
+.user-chip .name{font-size:13px;font-weight:600;}
+.user-chip .email{font-size:11px;color:var(--text-faint);}
+.logout-btn{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:12px;margin-top:8px;padding:4px;}
+.logout-btn:hover{color:var(--overdue);}
+
+.main{flex:1;padding:32px 40px;max-width:1100px;}
+.main-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+.main-header h1{font-size:24px;font-weight:700;letter-spacing:-0.01em;}
+.main-header p{color:var(--text-dim);font-size:13.5px;margin-top:4px;}
+
+/* Stat cards */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:28px;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:16px 18px;position:relative;overflow:hidden;
+}
+.stat-card .rail{position:absolute;left:0;top:0;bottom:0;width:3px;}
+.stat-card .num{font-size:26px;font-weight:700;font-family:'Space Grotesk';}
+.stat-card .lbl{font-size:11.5px;color:var(--text-dim);margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}
+
+.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-dim);margin:26px 0 12px;display:flex;align-items:center;justify-content:space-between;}
+
+/* Task list */
+.task-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px 14px 18px;margin-bottom:10px;
+  display:flex;align-items:center;gap:14px;
+  position:relative;
+}
+.task-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px;
+}
+.task-card.status-todo::before{background:var(--text-faint);}
+.task-card.status-progress::before{background:var(--progress);}
+.task-card.status-done::before{background:var(--done);}
+.task-card.overdue::before{background:var(--overdue);}
+.task-main{flex:1;min-width:0;}
+.task-title{font-size:14.5px;font-weight:600;margin-bottom:3px;}
+.task-title.done{text-decoration:line-through;color:var(--text-faint);}
+.task-meta{display:flex;gap:12px;font-size:12px;color:var(--text-faint);flex-wrap:wrap;}
+.task-meta .assignee{display:flex;align-items:center;gap:5px;}
+.task-meta .due.overdue-text{color:var(--overdue);font-weight:600;}
+.status-select{
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  font-size:12px;padding:6px 8px;border-radius:6px;font-family:'Inter';cursor:pointer;
+}
+.icon-btn{
+  background:none;border:none;color:var(--text-faint);cursor:pointer;padding:6px;
+  border-radius:6px;font-size:15px;line-height:1;
+}
+.icon-btn:hover{color:var(--overdue);background:var(--surface-2);}
+.empty-state{
+  text-align:center;padding:50px 20px;color:var(--text-faint);
+  background:var(--surface);border:1px dashed var(--border);border-radius:12px;
+}
+.empty-state p{font-size:13.5px;margin-top:6px;}
+
+/* Modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,11,15,0.7);
+  display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:26px;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;
+}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:18px;}
+.field select{
+  width:100%;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'Inter';
+}
+.field textarea{
+  width:100%;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'Inter';
+  resize:vertical;min-height:64px;
+}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.modal-actions .btn{flex:1;}
+.close-x{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-faint);font-size:18px;cursor:pointer;}
+.modal{position:relative;}
+
+.members-list{margin-top:6px;}
+.member-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.member-row:last-child{border-bottom:none;}
+.member-info{display:flex;align-items:center;gap:10px;}
+.member-info .avatar{width:28px;height:28px;font-size:11px;}
+.member-info .mname{font-size:13.5px;font-weight:600;}
+.member-info .memail{font-size:11.5px;color:var(--text-faint);}
+.role-badge{font-size:10.5px;text-transform:uppercase;font-weight:700;letter-spacing:.04em;padding:3px 8px;border-radius:5px;}
+.role-badge.Admin{background:var(--accent-soft);color:var(--accent);}
+.role-badge.Member{background:var(--surface-2);color:var(--text-dim);}
+
+.fab-row{display:flex;gap:10px;}
+@media (max-width:800px){
+  #app-screen{flex-direction:column;}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);flex-direction:row;flex-wrap:wrap;align-items:center;}
+  .sidebar .brand-mark{margin-bottom:0;}
+  .main{padding:22px 18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="brand-mark"><div class="dot"></div><span>Relay</span></div>
+
+    <div id="login-form">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to your workspace</p>
+      <div id="login-error"></div>
+      <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="you@company.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="handleLogin()">Sign in</button>
+      <div class="auth-switch">No account? <button onclick="toggleAuth('signup')">Create one</button></div>
+    </div>
+
+    <div id="signup-form" class="hidden">
+      <h1>Create your account</h1>
+      <p class="sub">Start managing projects with your team</p>
+      <div id="signup-error"></div>
+      <div class="field"><label>Name</label><input type="text" id="signup-name" placeholder="Jordan Lee"></div>
+      <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="you@company.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="signup-password" placeholder="At least 6 characters"></div>
+      <button class="btn btn-primary" onclick="handleSignup()">Create account</button>
+      <div class="auth-switch">Already have an account? <button onclick="toggleAuth('login')">Sign in</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SCREEN ============ -->
+<div id="app-screen" class="hidden">
+  <div class="sidebar">
+    <div class="brand-mark"><div class="dot"></div><span>Relay</span></div>
+
+    <button class="btn btn-ghost btn-small" style="width:100%;margin-bottom:6px;" onclick="openModal('project-modal')">+ New project</button>
+
+    <div class="sidebar-section-label">Projects</div>
+    <div id="project-list"></div>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar" id="user-avatar"></div>
+        <div>
+          <div class="name" id="user-name"></div>
+          <div class="email" id="user-email"></div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sign out →</button>
+    </div>
+  </div>
+
+  <div class="main" id="main-content">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div id="project-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('project-modal')">✕</button>
+    <h2>New project</h2>
+    <div class="field"><label>Project name</label><input type="text" id="new-project-name" placeholder="Website Redesign"></div>
+    <div class="field"><label>Description</label><textarea id="new-project-desc" placeholder="What's this project about?"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('project-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createProject()">Create project</button>
+    </div>
+  </div>
+</div>
+
+<div id="task-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('task-modal')">✕</button>
+    <h2>New task</h2>
+    <div class="field"><label>Title</label><input type="text" id="new-task-title" placeholder="Design the landing page"></div>
+    <div class="field"><label>Description</label><textarea id="new-task-desc" placeholder="Details, links, notes…"></textarea></div>
+    <div class="field"><label>Assign to</label><select id="new-task-assignee"><option value="">Unassigned</option></select></div>
+    <div class="field"><label>Due date</label><input type="date" id="new-task-due"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('task-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createTask()">Add task</button>
+    </div>
+  </div>
+</div>
+
+<div id="members-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('members-modal')">✕</button>
+    <h2>Team members</h2>
+    <div class="members-list" id="members-list"></div>
+    <div class="field" style="margin-top:18px;"><label>Add member by email</label><input type="email" id="invite-email" placeholder="teammate@company.com"></div>
+    <div class="field"><label>Role</label>
+      <select id="invite-role"><option value="Member">Member</option><option value="Admin">Admin</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="width:100%;" onclick="inviteMember()">Add to project</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
